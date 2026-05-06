@@ -140,22 +140,6 @@ const DashLayout = () => {
               Dashboard
             </Typography>
             <Box
-              component="input"
-              placeholder="Search..."
-              sx={{
-                display: { xs: 'none', sm: 'block' },
-                width: 180,
-                border: '1px solid rgba(255,255,255,0.35)',
-                borderRadius: 1,
-                bgcolor: 'rgba(255,255,255,0.14)',
-                color: '#ffffff',
-                px: 1.25,
-                py: 0.75,
-                outline: 'none',
-                '&::placeholder': { color: 'rgba(255,255,255,0.72)' },
-              }}
-            />
-            <Box
               component="button"
               type="button"
               sx={{

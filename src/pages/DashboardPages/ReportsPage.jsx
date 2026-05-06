@@ -1,14 +1,70 @@
-import { useRef } from 'react';
-import { Box, Button, Paper, Stack, Typography } from '@mui/material';
+import { useMemo, useRef, useState } from 'react';
+import { Box, Button, FormControl, InputLabel, MenuItem, Paper, Select, Stack, Typography } from '@mui/material';
 import { BarChart, LineChart, PieChart } from '@mui/x-charts';
-import PrintRoundedIcon from '@mui/icons-material/PrintRounded';
+import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
+import FilterAltRoundedIcon from '@mui/icons-material/FilterAltRounded';
+import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
+
+const reportData = {
+  monthly: {
+    label: 'Monthly',
+    comparison: [
+      { data: [18, 24, 20, 27], label: 'Generated', color: '#3f51f5' },
+      { data: [12, 19, 17, 23], label: 'Completed', color: '#ffb020' },
+    ],
+    trend: [22, 29, 25, 34],
+    cards: [
+      { label: 'Reports Generated', value: '89' },
+      { label: 'Completed', value: '71' },
+      { label: 'Active Users', value: '45' },
+      { label: 'Pending Tasks', value: '18' },
+    ],
+  },
+  quarterly: {
+    label: 'Quarterly',
+    comparison: [
+      { data: [35, 44, 24, 34], label: 'Generated', color: '#3f51f5' },
+      { data: [51, 6, 49, 30], label: 'Completed', color: '#ffb020' },
+    ],
+    trend: [28, 38, 34, 52],
+    cards: [
+      { label: 'Reports Generated', value: '137' },
+      { label: 'Completed', value: '104' },
+      { label: 'Active Users', value: '45' },
+      { label: 'Pending Tasks', value: '08' },
+    ],
+  },
+  yearly: {
+    label: 'Yearly',
+    comparison: [
+      { data: [88, 112, 96, 124], label: 'Generated', color: '#3f51f5' },
+      { data: [74, 98, 82, 111], label: 'Completed', color: '#ffb020' },
+    ],
+    trend: [86, 108, 94, 128],
+    cards: [
+      { label: 'Reports Generated', value: '420' },
+      { label: 'Completed', value: '365' },
+      { label: 'Active Users', value: '58' },
+      { label: 'Pending Tasks', value: '55' },
+    ],
+  },
+};
 
 const ReportsPage = () => {
   const reportRef = useRef(null);
+  const [reportPeriod, setReportPeriod] = useState('quarterly');
+  const [showFilters, setShowFilters] = useState(false);
+  const [generatedAt, setGeneratedAt] = useState('');
 
-  const handlePrint = () => {
+  const activeReport = useMemo(() => reportData[reportPeriod], [reportPeriod]);
+
+  const handleExport = () => {
     reportRef.current?.scrollIntoView({ block: 'start' });
     window.print();
+  };
+
+  const handleGenerate = () => {
+    setGeneratedAt(new Date().toLocaleString());
   };
 
   return (
@@ -32,14 +88,45 @@ const ReportsPage = () => {
               Reports
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Charts and a print-ready summary for saving as PDF.
+              Report analytics overview with export, generate, and filter controls.
             </Typography>
+            {generatedAt ? (
+              <Typography variant="caption" color="text.secondary">
+                Last generated: {generatedAt}
+              </Typography>
+            ) : null}
           </Box>
 
-          <Button variant="contained" startIcon={<PrintRoundedIcon />} onClick={handlePrint}>
-            Print PDF
-          </Button>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25}>
+            <Button variant="contained" startIcon={<DownloadRoundedIcon />} onClick={handleExport}>
+              Export
+            </Button>
+            <Button variant="outlined" startIcon={<RefreshRoundedIcon />} onClick={handleGenerate}>
+              Generate
+            </Button>
+            <Button variant="outlined" startIcon={<FilterAltRoundedIcon />} onClick={() => setShowFilters((open) => !open)}>
+              Filter
+            </Button>
+          </Stack>
         </Box>
+
+        {showFilters ? (
+          <Paper className="no-print" elevation={0} sx={{ border: '1px solid #e5e7eb', p: 2 }}>
+            <FormControl sx={{ minWidth: 220 }}>
+              <InputLabel id="report-period-label">Report Period</InputLabel>
+              <Select
+                labelId="report-period-label"
+                label="Report Period"
+                value={reportPeriod}
+                onChange={(event) => setReportPeriod(event.target.value)}
+              >
+                <MenuItem value="monthly">Monthly</MenuItem>
+                <MenuItem value="quarterly">Quarterly</MenuItem>
+                <MenuItem value="yearly">Yearly</MenuItem>
+              </Select>
+            </FormControl>
+          </Paper>
+        ) : null}
 
         <Box
           ref={reportRef}
@@ -51,7 +138,7 @@ const ReportsPage = () => {
         >
           <Paper elevation={0} sx={{ border: '1px solid #e5e7eb', p: 2 }}>
             <Typography variant="overline" sx={{ color: '#6b7280', letterSpacing: '0.2em' }}>
-              Quarterly Overview
+              {activeReport.label} Overview
             </Typography>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 800 }}>
               Report snapshot
@@ -65,12 +152,7 @@ const ReportsPage = () => {
                 mb: 3,
               }}
             >
-              {[
-                { label: 'Orders', value: '124' },
-                { label: 'Revenue', value: '$18.4K' },
-                { label: 'Active Users', value: '45' },
-                { label: 'Pending Tasks', value: '08' },
-              ].map((item) => (
+              {activeReport.cards.map((item) => (
                 <Paper key={item.label} elevation={0} sx={{ border: '1px solid #e5e7eb', p: 1.5 }}>
                   <Typography variant="body2" color="text.secondary">
                     {item.label}
@@ -92,15 +174,12 @@ const ReportsPage = () => {
             >
               <Box sx={{ minWidth: 0 }}>
                 <Typography variant="subtitle1" sx={{ mb: 1.5, fontWeight: 800 }}>
-                  Quarterly Comparison
+                  {activeReport.label} Report Output
                 </Typography>
                 <BarChart
                   height={360}
                   xAxis={[{ scaleType: 'band', data: ['Q1', 'Q2', 'Q3', 'Q4'], label: 'Quarters' }]}
-                  series={[
-                    { data: [35, 44, 24, 34], label: 'Series 1', color: '#3f51f5' },
-                    { data: [51, 6, 49, 30], label: 'Series 2', color: '#ffb020' },
-                  ]}
+                  series={activeReport.comparison}
                   margin={{ left: 52, right: 28, top: 36, bottom: 56 }}
                 />
               </Box>
@@ -135,7 +214,7 @@ const ReportsPage = () => {
                   <LineChart
                     height={300}
                     xAxis={[{ scaleType: 'point', data: ['Q1', 'Q2', 'Q3', 'Q4'] }]}
-                    series={[{ data: [28, 38, 34, 52], label: 'Activity', color: '#1976d2' }]}
+                    series={[{ data: activeReport.trend, label: 'Activity', color: '#1976d2' }]}
                     margin={{ left: 44, right: 24, top: 32, bottom: 36 }}
                   />
                 </Paper>
