@@ -52,7 +52,13 @@ const NavBar = () => {
                 to="/auth/signin"
                 className="ml-2 rounded-full border border-[#181716] bg-[#181716] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#f4efe7] shadow-[0_10px_25px_rgba(24,23,22,0.14)] transition hover:bg-[#2c2a28]"
               >
-                Log In
+                Sign In
+              </NavLink>
+              <NavLink
+                to="/auth/signup"
+                className="rounded-full border border-[#181716]/15 bg-white/45 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#5d564d] transition hover:border-[#181716] hover:bg-[#fffaf2]"
+              >
+                Sign Up
               </NavLink>
             </nav>
           </div>

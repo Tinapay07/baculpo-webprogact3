@@ -1,0 +1,90 @@
+[
+  {
+    "id": 1,
+    "firstName": "Jon",
+    "lastName": "Snow",
+    "email": "jon.snow@example.com",
+    "username": "jonsnow",
+    "role": "Admin",
+    "gender": "Male",
+    "status": "Active",
+    "age": 24
+  },
+  {
+    "id": 2,
+    "firstName": "Cersei",
+    "lastName": "Lannister",
+    "email": "cersei.lannister@example.com",
+    "username": "queencersei",
+    "role": "Manager",
+    "gender": "Female",
+    "status": "Active",
+    "age": 32
+  },
+  {
+    "id": 3,
+    "firstName": "Jaime",
+    "lastName": "Lannister",
+    "email": "jaime.lannister@example.com",
+    "username": "jaimegold",
+    "role": "Editor",
+    "gender": "Male",
+    "status": "Inactive",
+    "age": 31
+  },
+  {
+    "id": 4,
+    "firstName": "Arya",
+    "lastName": "Stark",
+    "email": "arya.stark@example.com",
+    "username": "needle",
+    "role": "Member",
+    "gender": "Female",
+    "status": "Active",
+    "age": 19
+  },
+  {
+    "id": 5,
+    "firstName": "Bran",
+    "lastName": "Stark",
+    "email": "bran.stark@example.com",
+    "username": "threeeyedbran",
+    "role": "Member",
+    "gender": "Male",
+    "status": "Inactive",
+    "age": 18
+  },
+  {
+    "id": 6,
+    "firstName": "Sansa",
+    "lastName": "Stark",
+    "email": "sansa.stark@example.com",
+    "username": "winterrose",
+    "role": "Manager",
+    "gender": "Female",
+    "status": "Active",
+    "age": 27
+  },
+  {
+    "id": 7,
+    "firstName": "Tyrion",
+    "lastName": "Lannister",
+    "email": "tyrion.lannister@example.com",
+    "username": "impwise",
+    "role": "Admin",
+    "gender": "Male",
+    "status": "Active",
+    "age": 35
+  },
+  {
+    "id": 8,
+    "firstName": "Daenerys",
+    "lastName": "Targaryen",
+    "email": "daenerys.targaryen@example.com",
+    "username": "stormborn",
+    "role": "Editor",
+    "gender": "Female",
+    "status": "Inactive",
+    "age": 29
+  }
+]
