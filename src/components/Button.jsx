@@ -12,10 +12,13 @@ const Button = ({
   type = 'button',
   variant = 'secondary',
   className = '',
+  disabled = false,
+  ...props
 }) => {
   const classes = [
     'inline-flex items-center justify-center gap-2 rounded-full border border-[#181716] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181716]/20',
     variantClasses[variant] ?? variantClasses.secondary,
+    disabled ? 'cursor-not-allowed opacity-60 hover:translate-y-0' : '',
     className,
   ]
     .join(' ')
@@ -23,14 +26,14 @@ const Button = ({
 
   if (to) {
     return (
-      <Link to={to} className={classes}>
+      <Link to={disabled ? '#' : to} className={classes} {...props}>
         {children}
       </Link>
     );
   }
 
   return (
-    <button type={type} className={classes}>
+    <button type={type} className={classes} disabled={disabled} {...props}>
       {children}
     </button>
   );

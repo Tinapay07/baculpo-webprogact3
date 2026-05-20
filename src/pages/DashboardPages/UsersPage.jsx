@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import users from '../../assets/users.json';
+import { createUser } from '../../services/UserService';
 
 const columns = [
   { field: 'id', headerName: 'ID', width: 80 },
@@ -63,10 +64,11 @@ const emptyUser = {
   username: '',
   contactNumber: '',
   password: '',
-  role: 'Member',
+  role: 'editor',
   gender: 'Male',
   status: 'Active',
   age: '',
+  address: '',
 };
 
 const UsersPage = () => {
@@ -81,6 +83,8 @@ const UsersPage = () => {
   const [openAddUser, setOpenAddUser] = useState(false);
   const [newUser, setNewUser] = useState(emptyUser);
   const [formErrors, setFormErrors] = useState({});
+  const [submitError, setSubmitError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const filteredRows = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
@@ -147,6 +151,7 @@ const UsersPage = () => {
   const handleAddUserOpen = () => {
     setNewUser(emptyUser);
     setFormErrors({});
+    setSubmitError('');
     setOpenAddUser(true);
   };
 
@@ -168,8 +173,9 @@ const UsersPage = () => {
     }));
   };
 
-  const handleAddUserSubmit = (event) => {
+  const handleAddUserSubmit = async (event) => {
     event.preventDefault();
+    setSubmitError('');
 
     const nextErrors = Object.entries({
       firstName: newUser.firstName,
@@ -179,6 +185,8 @@ const UsersPage = () => {
       contactNumber: newUser.contactNumber,
       password: newUser.password,
       age: newUser.age,
+      gender: newUser.gender,
+      address: newUser.address,
     }).reduce((accumulator, [field, value]) => {
       const error = validateUserField(field, value);
 
@@ -194,23 +202,39 @@ const UsersPage = () => {
       return;
     }
 
-    const nextId = rows.length ? Math.max(...rows.map((row) => row.id)) + 1 : 1;
+    setIsSubmitting(true);
 
-    setRows((current) => [
-      ...current,
-      {
-        id: nextId,
+    try {
+      const createdUser = await createUser({
         ...newUser,
-        contactNumber: newUser.contactNumber,
-        password: newUser.password,
-        age: Number(newUser.age),
-        fullName: `${newUser.firstName} ${newUser.lastName}`.trim(),
-      },
-    ]);
+        type: newUser.role,
+        isActive: newUser.status === 'Active',
+      });
 
-    setOpenAddUser(false);
-    setNewUser(emptyUser);
-    setFormErrors({});
+      const nextId =
+        createdUser?.id ||
+        (rows.length ? Math.max(...rows.map((row) => Number(row.id) || 0)) + 1 : 1);
+
+      setRows((current) => [
+        ...current,
+        {
+          id: nextId,
+          ...newUser,
+          role: newUser.role,
+          contactNumber: newUser.contactNumber,
+          age: Number(newUser.age),
+          fullName: `${newUser.firstName} ${newUser.lastName}`.trim(),
+        },
+      ]);
+
+      setOpenAddUser(false);
+      setNewUser(emptyUser);
+      setFormErrors({});
+    } catch (error) {
+      setSubmitError(error.message || 'Unable to save user.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -258,6 +282,9 @@ const UsersPage = () => {
                 <MenuItem value="Manager">Manager</MenuItem>
                 <MenuItem value="Editor">Editor</MenuItem>
                 <MenuItem value="Member">Member</MenuItem>
+                <MenuItem value="admin">admin</MenuItem>
+                <MenuItem value="editor">editor</MenuItem>
+                <MenuItem value="viewer">viewer</MenuItem>
               </Select>
             </FormControl>
 
@@ -395,6 +422,16 @@ const UsersPage = () => {
             helperText={formErrors.password || 'Use at least 8 characters.'}
           />
 
+          <TextField
+            label="Address"
+            value={newUser.address}
+            onChange={handleNewUserChange('address')}
+            required
+            fullWidth
+            error={Boolean(formErrors.address)}
+            helperText={formErrors.address || ''}
+          />
+
           <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' } }}>
               <FormControl fullWidth>
                 <InputLabel id="new-role-label">Role</InputLabel>
@@ -404,10 +441,9 @@ const UsersPage = () => {
                   value={newUser.role}
                   onChange={handleNewUserChange('role')}
                 >
-                  <MenuItem value="Admin">Admin</MenuItem>
-                  <MenuItem value="Manager">Manager</MenuItem>
-                  <MenuItem value="Editor">Editor</MenuItem>
-                  <MenuItem value="Member">Member</MenuItem>
+                  <MenuItem value="admin">admin</MenuItem>
+                  <MenuItem value="editor">editor</MenuItem>
+                  <MenuItem value="viewer">viewer</MenuItem>
                 </Select>
               </FormControl>
 
@@ -451,11 +487,16 @@ const UsersPage = () => {
           </DialogContent>
 
           <DialogActions sx={{ px: 3, pb: 3 }}>
+            {submitError ? (
+              <Typography variant="body2" color="error" sx={{ mr: 'auto' }}>
+                {submitError}
+              </Typography>
+            ) : null}
             <Button onClick={handleAddUserClose} variant="outlined">
               Cancel
             </Button>
-            <Button type="submit" variant="contained">
-              Save User
+            <Button type="submit" variant="contained" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save User'}
             </Button>
           </DialogActions>
         </Box>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../components/Button';
+import { createUser } from '../../services/UserService';
 
 const inputClasses =
   'mt-2 w-full rounded-xl border border-zinc-300 bg-zinc-100 px-4 py-3 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-900 focus:bg-zinc-50';
@@ -8,6 +9,7 @@ const inputClasses =
 const actionButtonClassName = 'w-full rounded-xl py-3 text-[11px] tracking-[0.2em]';
 
 const SignUpPage = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -15,9 +17,16 @@ const SignUpPage = () => {
     email: '',
     contactNumber: '',
     age: '',
+    gender: '',
+    address: '',
     password: '',
   });
   const [errors, setErrors] = useState({});
+  const [status, setStatus] = useState({
+    loading: false,
+    error: '',
+    success: '',
+  });
 
   const validateField = (name, value) => {
     if (!String(value).trim()) {
@@ -75,7 +84,7 @@ const SignUpPage = () => {
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const nextErrors = Object.entries(formData).reduce((accumulator, [name, value]) => {
@@ -89,6 +98,37 @@ const SignUpPage = () => {
     }, {});
 
     setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) {
+      setStatus({ loading: false, error: 'Please fix the highlighted fields.', success: '' });
+      return;
+    }
+
+    setStatus({ loading: true, error: '', success: '' });
+
+    try {
+      await createUser({
+        ...formData,
+        type: 'editor',
+        isActive: true,
+      });
+
+      setStatus({
+        loading: false,
+        error: '',
+        success: 'Account created. Redirecting to login...',
+      });
+
+      setTimeout(() => {
+        navigate('/auth/signin', { replace: true });
+      }, 700);
+    } catch (error) {
+      setStatus({
+        loading: false,
+        error: error.message || 'Unable to create account.',
+        success: '',
+      });
+    }
   };
 
   return (
@@ -259,8 +299,60 @@ const SignUpPage = () => {
           )}
         </div>
 
-        <Button type="submit" variant="primary" className={actionButtonClassName}>
-          Create Account
+        <div>
+          <label htmlFor="gender" className="text-sm font-medium text-zinc-700">
+            Gender
+          </label>
+          <select
+            id="gender"
+            name="gender"
+            value={formData.gender}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            required
+            className={inputClasses}
+          >
+            <option value="">Select gender</option>
+            <option value="Female">Female</option>
+            <option value="Male">Male</option>
+            <option value="Non-binary">Non-binary</option>
+            <option value="Prefer not to say">Prefer not to say</option>
+          </select>
+          {errors.gender ? <p className="mt-2 text-xs font-medium text-red-600">{errors.gender}</p> : null}
+        </div>
+
+        <div>
+          <label htmlFor="address" className="text-sm font-medium text-zinc-700">
+            Address
+          </label>
+          <input
+            id="address"
+            name="address"
+            type="text"
+            value={formData.address}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            placeholder="Complete address"
+            required
+            className={inputClasses}
+          />
+          {errors.address ? <p className="mt-2 text-xs font-medium text-red-600">{errors.address}</p> : null}
+        </div>
+
+        {status.error ? (
+          <p className="text-sm text-red-600">{status.error}</p>
+        ) : null}
+        {status.success ? (
+          <p className="text-sm text-emerald-600">{status.success}</p>
+        ) : null}
+
+        <Button
+          type="submit"
+          variant="primary"
+          className={actionButtonClassName}
+          disabled={status.loading}
+        >
+          {status.loading ? 'Creating Account...' : 'Create Account'}
         </Button>
 
         <div className="grid gap-3 pt-2 sm:grid-cols-2">

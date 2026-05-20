@@ -17,16 +17,19 @@ import {
   createTheme,
 } from '@mui/material';
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
+import ArticleRoundedIcon from '@mui/icons-material/ArticleRounded';
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import QueryStatsRoundedIcon from '@mui/icons-material/QueryStatsRounded';
+import { clearAuth, getUserRole } from '../services/AuthService';
 
 const drawerWidth = 150;
 
 const navItems = [
   { label: 'Dashboard', to: '/dashboard', icon: <DashboardRoundedIcon /> },
   { label: 'Reports', to: '/dashboard/reports', icon: <QueryStatsRoundedIcon /> },
-  { label: 'Users', to: '/dashboard/users', icon: <GroupsRoundedIcon /> },
+  { label: 'Articles', to: '/dashboard/articles', icon: <ArticleRoundedIcon />, roles: ['admin', 'editor'] },
+  { label: 'Users', to: '/dashboard/users', icon: <GroupsRoundedIcon />, roles: ['admin'] },
 ];
 
 const theme = createTheme({
@@ -58,6 +61,10 @@ const theme = createTheme({
 
 const DashboardDrawer = ({ onNavigate }) => {
   const location = useLocation();
+  const role = getUserRole();
+  const visibleNavItems = navItems.filter(
+    (item) => !item.roles || item.roles.includes(role),
+  );
 
   return (
     <Box sx={{ height: '100%', bgcolor: 'background.paper' }}>
@@ -73,7 +80,7 @@ const DashboardDrawer = ({ onNavigate }) => {
       </Toolbar>
       <Divider />
       <List sx={{ px: 1, py: 1 }}>
-        {navItems.map((item) => (
+        {visibleNavItems.map((item) => (
           <ListItemButton
             key={item.to}
             component={Link}
@@ -112,6 +119,11 @@ const DashLayout = () => {
     setMobileOpen((open) => !open);
   };
 
+  const handleLogout = () => {
+    clearAuth();
+    window.location.href = '/auth/signin';
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -142,6 +154,7 @@ const DashLayout = () => {
             <Box
               component="button"
               type="button"
+              onClick={handleLogout}
               sx={{
                 border: '1px solid rgba(255,255,255,0.65)',
                 borderRadius: 1,
